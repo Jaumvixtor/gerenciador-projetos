@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciador de Projetos - FUMEC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-6">Sistema de Gerenciamento de Projetos</h1>
+        <p class="text-muted">Desenvolvimento Web - Node.js</p>
+    </div>
+
+    <div class="card mb-5 border-0 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title text-success mb-3"><i class="bi bi-person-plus-fill"></i> Novo Usuário</h5>
+            <form action="/usuarios/criar" method="POST" class="row g-3">
+                <div class="col-md-5">
+                    <input type="text" name="nome" class="form-control" placeholder="Nome Completo" required>
+                </div>
+                <div class="col-md-5">
+                    <input type="email" name="email" class="form-control" placeholder="E-mail" required>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-success w-100">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <% if (usuarios.length === 0) { %>
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle"></i> Nenhum usuário cadastrado.
+        </div>
+    <% } %>
+
+    <% usuarios.forEach(function(usuario) { %>
+        <div class="card mb-5 shadow border-top border-primary border-4">
+            
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <h4 class="m-0 text-primary">
+                    <i class="bi bi-person-circle"></i> <%= usuario.nome %> 
+                    <small class="text-muted fs-6 ms-2">(<%= usuario.email %>)</small>
+                </h4>
+                
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editUserModal<%= usuario.id %>">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <form action="/usuarios/deletar" method="POST" onsubmit="return confirm('Apagar usuário?');">
+                        <input type="hidden" name="id" value="<%= usuario.id %>">
+                        <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="modal fade" id="editUserModal<%= usuario.id %>" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Editar Usuário</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="/usuarios/editar" method="POST">
+                                <input type="hidden" name="id" value="<%= usuario.id %>">
+                                <div class="mb-3">
+                                    <label>Nome</label>
+                                    <input type="text" name="nome" class="form-control" value="<%= usuario.nome %>" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label>Email</label>
+                                    <input type="email" name="email" class="form-control" value="<%= usuario.email %>" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Salvar Alterações</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body bg-light">
+                
+                <form action="/projetos/criar" method="POST" class="row g-2 mb-4 align-items-center bg-white p-3 rounded border">
+                    <input type="hidden" name="usuarioId" value="<%= usuario.id %>">
+                    <div class="col-auto"><strong class="text-secondary"><i class="bi bi-folder-plus"></i> Novo Projeto:</strong></div>
+                    <div class="col-md-5">
+                        <input type="text" name="nome" class="form-control form-control-sm" placeholder="Nome do Projeto" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" name="prazo" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary btn-sm">Criar</button>
+                    </div>
+                </form>
+
+                <% const projetosDoUsuario = projetos.filter(p => p.usuarioId == usuario.id); %>
+                
+                <div class="row">
+                    <% projetosDoUsuario.forEach(function(projeto) { %>
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 shadow-sm border-0">
+                                <div class="card-header bg-white">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h5 class="card-title m-0 text-dark"><i class="bi bi-folder"></i> <%= projeto.nome %></h5>
+                                        <div class="d-flex gap-1">
+                                            <button type="button" class="btn btn-link text-primary p-0 me-2" data-bs-toggle="modal" data-bs-target="#editProjModal<%= projeto.id %>">
+                                                <i class="bi bi-pencil-square fs-5"></i>
+                                            </button>
+                                            <form action="/projetos/deletar" method="POST" onsubmit="return confirm('Excluir projeto?');">
+                                                <input type="hidden" name="id" value="<%= projeto.id %>">
+                                                <button type="submit" class="btn btn-link text-danger p-0"><i class="bi bi-x-circle-fill fs-5"></i></button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-2 small border-top pt-2">
+                                        <div class="text-muted">Criado: <%= projeto.dataCriacao %></div>
+                                        <div class="d-flex justify-content-between align-items-center mt-1">
+                                            <span>Entrega: <strong><%= projeto.prazoISO ? projeto.prazoISO.split('-').reverse().join('/') : 'S/ Data' %></strong></span>
+                                            
+                                            <span class="badge timer-badge bg-secondary" data-prazo="<%= projeto.prazoISO %>">
+                                                <i class="bi bi-hourglass-split"></i> Calculando...
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal fade" id="editProjModal<%= projeto.id %>" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Editar Projeto</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="/projetos/editar" method="POST">
+                                                    <input type="hidden" name="id" value="<%= projeto.id %>">
+                                                    <div class="mb-3">
+                                                        <label>Nome do Projeto</label>
+                                                        <input type="text" name="nome" class="form-control" value="<%= projeto.nome %>" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label>Prazo de Entrega</label>
+                                                        <input type="date" name="prazo" class="form-control" value="<%= projeto.prazoISO %>" required>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary w-100">Salvar Alterações</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-body">
+                                    <form action="/tarefas/criar" method="POST" class="input-group input-group-sm mb-3">
+                                        <input type="hidden" name="projetoId" value="<%= projeto.id %>">
+                                        <input type="text" name="descricao" class="form-control" placeholder="Nova tarefa..." required>
+                                        <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-plus-lg"></i></button>
+                                    </form>
+
+                                    <% const tarefasDoProjeto = tarefas.filter(t => t.projetoId == projeto.id); %>
+                                    
+                                    <ul class="list-group list-group-flush small">
+                                        <% tarefasDoProjeto.forEach(function(tarefa) { %>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                <div class="d-flex align-items-center">
+                                                    <form action="/tarefas/alternar" method="POST" class="me-2">
+                                                        <input type="hidden" name="id" value="<%= tarefa.id %>">
+                                                        <button type="submit" class="btn p-0 border-0">
+                                                            <% if(tarefa.concluida) { %>
+                                                                <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                                                            <% } else { %>
+                                                                <i class="bi bi-circle text-secondary fs-5"></i>
+                                                            <% } %>
+                                                        </button>
+                                                    </form>
+                                                    <span class="<%= tarefa.concluida ? 'text-decoration-line-through text-muted' : '' %>">
+                                                        <%= tarefa.descricao %>
+                                                    </span>
+                                                </div>
+
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button" class="btn btn-link text-secondary p-0 me-2" data-bs-toggle="modal" data-bs-target="#editTarefaModal<%= tarefa.id %>">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <form action="/tarefas/deletar" method="POST" style="display:inline;">
+                                                        <input type="hidden" name="id" value="<%= tarefa.id %>">
+                                                        <button class="btn btn-link text-danger p-0 border-0"><i class="bi bi-trash"></i></button>
+                                                    </form>
+                                                </div>
+                                            </li>
+
+                                            <div class="modal fade" id="editTarefaModal<%= tarefa.id %>" tabindex="-1">
+                                                <div class="modal-dialog modal-sm">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h6 class="modal-title">Editar Tarefa</h6>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form action="/tarefas/editar" method="POST">
+                                                                <input type="hidden" name="id" value="<%= tarefa.id %>">
+                                                                <div class="mb-2">
+                                                                    <input type="text" name="descricao" class="form-control" value="<%= tarefa.descricao %>" required>
+                                                                </div>
+                                                                <button type="submit" class="btn btn-primary btn-sm w-100">Salvar</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <% }); %>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        </div>
+    <% }); %>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function atualizarTimers() {
+        // Busca todos os elementos que possuem a classe 'timer-badge'
+        const badges = document.querySelectorAll('.timer-badge');
+
+        badges.forEach(badge => {
+            // Recupera a data de prazo armazenada no atributo HTML personalizado 'data-prazo'
+            const prazoString = badge.getAttribute('data-prazo');
+            
+            if (!prazoString) {
+                badge.innerText = "Sem prazo";
+                badge.className = "badge bg-secondary timer-badge";
+                return;
+            }
+
+            // Cria objetos Date para fazer a matemática
+            const fimDoPrazo = new Date(prazoString + 'T23:59:59'); // Fim do dia do prazo
+            const agora = new Date();
+            
+            let diff = fimDoPrazo - agora; // Diferença em milissegundos
+
+            // Se a diferença for negativa, o prazo já passou
+            if (diff < 0) {
+                badge.innerHTML = "<i class='bi bi-exclamation-triangle-fill'></i> Prazo expirado!";
+                badge.className = "badge bg-danger timer-badge";
+                return;
+            }
+
+            // Conversão de Milissegundos para Dias/Horas/Minutos/Segundos
+            const msPorSegundo = 1000;
+            const msPorMinuto = 60 * 1000;
+            const msPorHora = 60 * 60 * 1000;
+            const msPorDia = 24 * 60 * 60 * 1000;
+            const msPorMes = 30 * msPorDia;
+
+            const meses = Math.floor(diff / msPorMes);
+            diff = diff % msPorMes;
+
+            const dias = Math.floor(diff / msPorDia);
+            diff = diff % msPorDia;
+
+            const horas = Math.floor(diff / msPorHora);
+            diff = diff % msPorHora;
+
+            const minutos = Math.floor(diff / msPorMinuto);
+            diff = diff % msPorMinuto;
+
+            const segundos = Math.floor(diff / msPorSegundo);
+
+            // Montagem do Texto de Exibição
+            let texto = "";
+            if (meses > 0) texto += `${meses}m `;
+            if (dias > 0) texto += `${dias}d `;
+            texto += `${horas}h ${minutos}m ${segundos}s`;
+
+            // Atualiza o DOM (HTML) com o novo tempo e cor verde
+            badge.innerHTML = `<i class='bi bi-clock-history'></i> ${texto}`;
+            badge.className = "badge bg-success timer-badge";
+        });
+    }
+
+    // Executa uma vez ao carregar a página
+    atualizarTimers();
+
+    // Configura um intervalo para executar a função a cada 1000ms (1 segundo)
+    setInterval(atualizarTimers, 1000);
+</script>
+
+</body>
+</html>

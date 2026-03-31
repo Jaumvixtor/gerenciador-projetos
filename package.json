@@ -1,0 +1,22 @@
+{
+  "name": "gerenciador-projetos-fumec",
+  "version": "1.0.0",
+  "description": "Sistema de Gerenciamento de Projetos - Trabalho de Desenvolvimento Web Back-End",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "ejs",
+    "mvc"
+  ],
+  "author": "João Victor Paula, Manuela Rocha, Daniel Ribeiro Costa",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0"
+  }
+}
